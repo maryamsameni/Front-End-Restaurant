@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ساخت دسته‌بندی جدید</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+    <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6">
+    <header class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-semibold">ساخت دسته‌بندی جدید</h1>
+    </header>
+
+    <!-- فرم ارسال داده‌ها -->
+    <div class="w-full  bg-white rounded-lg shadow-lg p-6">
+        <form id="categoryForm" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="Title" class="block text-sm font-medium text-gray-700">عنوان دسته‌بندی</label>
+                <input type="text" id="Title" name="Title" required class="mt-1 px-3 py-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="عنوان دسته‌بندی را وارد کنید">
+            </div>
+
+            <div class="mb-4">
+                <label for="Image" class="block text-sm font-medium text-gray-700">تصویر دسته‌بندی</label>
+                <input type="file" id="Image" name="Image" required class="mt-1 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="Status" class="block text-sm font-medium text-gray-700">وضعیت</label>
+                <select id="Status" name="Status" required class="mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="active">فعال</option>
+                    <option value="inactive">غیرفعال</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="SortOrder" class="block text-sm font-medium text-gray-700">ترتیب</label>
+                <input type="number" id="SortOrder" name="SortOrder" required class="mt-1 px-3 py-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="ترتیب را وارد کنید">
+            </div>
+
+            <div class="flex justify-center mt-6">
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    ساخت دسته‌بندی
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+        window.location.href = '/login/';
+    }
+
+    document.getElementById('categoryForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData();
+        formData.append('Title', document.getElementById('Title').value);
+        formData.append('Image', document.getElementById('Image').files[0]);
+        formData.append('Status', document.getElementById('Status').value);
+        formData.append('SortOrder', document.getElementById('SortOrder').value);
+
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        };
+
+        try {
+            const response = await fetch('http://localhost:3000/Category/create', requestOptions);
+            if (response.ok) {
+                alert('دسته‌بندی با موفقیت ساخته شد.');
+                window.location.href = '/categories'; // انتقال به صفحه لیست دسته‌بندی‌ها
+            } else {
+                alert('خطا در ساخت دسته‌بندی.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ورود یا ثبت‌نام</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @layer base {
+        body {
+          direction: rtl;
+          font-family: "IRANSans", sans-serif;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center w-[400px]">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">خوش آمدید</h1>
+      <p class="text-gray-600 mb-6">لطفاً انتخاب کنید:</p>
+      <div class="space-y-4">
+        <a
+          href="/login/index.html"
+          class="block bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+        >
+          ورود
+        </a>
+        <a
+          href="/register/index.html"
+          class="block bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition"
+        >
+          ثبت‌نام
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

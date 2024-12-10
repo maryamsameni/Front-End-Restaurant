@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جزئیات محصول</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+  <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+  <nav class="flex-1">
+    <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6">
+  <header class="flex justify-between items-center mb-4">
+    <h1 class="text-xl font-semibold">جزئیات محصولات</h1>
+    <a href="/product-details/create/index.html" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+      افزودن جزئیات جدید
+    </a>
+  </header>
+
+  <section class="bg-white rounded-lg shadow-lg">
+    <table class="w-full">
+      <thead class="bg-gray-200">
+      <tr>
+        <th class="p-3 text-right">عکس</th>
+        <th class="p-3 text-right">عنوان</th>
+        <th class="p-3 text-right">توضیحات</th>
+        <th class="p-3 text-right">قیمت</th>
+        <th class="p-3 text-right">موجودی</th>
+        <th class="p-3 text-right">عملیات</th>
+      </tr>
+      </thead>
+      <tbody id="product-detail-list">
+      <tr>
+        <td colspan="6" class="p-4 text-center text-gray-500">در حال بارگذاری...</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+    window.location.href = '/login/';
+  }
+
+  async function fetchProductDetails() {
+    try {
+      const response = await fetch('http://localhost:3000/ProductDetail/getList', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const productDetails = await response.json();
+        renderProductDetails(productDetails);
+      } else {
+        alert('خطا در دریافت جزئیات محصولات.');
+      }
+    } catch (error) {
+      alert('خطا در ارتباط با سرور.');
+    }
+  }
+
+  function renderProductDetails(productDetails) {
+    const productDetailList = document.getElementById('product-detail-list');
+    productDetailList.innerHTML = '';
+
+    if (productDetails.length === 0) {
+      productDetailList.innerHTML = `
+        <tr>
+          <td colspan="6" class="p-4 text-center text-gray-500">هیچ جزئیاتی برای نمایش وجود ندارد.</td>
+        </tr>
+      `;
+    }
+
+    productDetails.forEach(detail => {
+      const row = document.createElement('tr');
+      row.className = 'border-b';
+      row.innerHTML = `
+        <td class="p-3 text-center">
+          <img src="${detail.Image}" alt="${detail.Title}" class="w-16 h-16 rounded">
+        </td>
+        <td class="p-3 text-right">${detail.Title}</td>
+        <td class="p-3 text-right">${detail.Description}</td>
+        <td class="p-3 text-right">${detail.Price} تومان</td>
+        <td class="p-3 text-right">${detail.StockQuantity || 'نامشخص'}</td>
+        <td class="p-3 text-right space-x-2">
+          <button class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600" onclick="editProductDetail(${detail.ProductDetailId})">
+            ویرایش
+          </button>
+          <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600" onclick="deleteProductDetail(${detail.ProductDetailId})">
+            حذف
+          </button>
+        </td>
+      `;
+      productDetailList.appendChild(row);
+    });
+  }
+
+  function editProductDetail(id) {
+    window.location.href = `/product-details/edit/index.html?id=${id}`;
+  }
+
+  async function deleteProductDetail(id) {
+    const confirmDelete = confirm('آیا مطمئن هستید که می‌خواهید این جزئیات را حذف کنید؟');
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/ProductDetail/remove/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        alert('جزئیات با موفقیت حذف شد.');
+        fetchProductDetails();
+      } else {
+        alert('خطا در حذف جزئیات.');
+      }
+    } catch (error) {
+      alert('خطا در ارتباط با سرور.');
+    }
+  }
+
+  fetchProductDetails();
+</script>
+
+</body>
+</html>

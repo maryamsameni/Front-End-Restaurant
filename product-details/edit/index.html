@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ویرایش جزئیات محصول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100 flex">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+    <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6">
+    <header class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-semibold">ویرایش جزئیات محصول</h1>
+    </header>
+
+    <section class="bg-white rounded-lg shadow-lg p-6">
+        <form id="edit-product-form" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="productId" class="block text-sm font-medium text-gray-700">آیدی محصول</label>
+                <input type="text" id="productId" name="ProductId" class="mt-1 p-2 w-full border border-gray-300 rounded" readonly required>
+            </div>
+
+            <div class="mb-4">
+                <label for="title" class="block text-sm font-medium text-gray-700">عنوان محصول</label>
+                <input type="text" id="title" name="Title" class="mt-1 p-2 w-full border border-gray-300 rounded" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">توضیحات</label>
+                <textarea id="description" name="Description" class="mt-1 p-2 w-full border border-gray-300 rounded" rows="4" required></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="price" class="block text-sm font-medium text-gray-700">قیمت</label>
+                <input type="text" id="price" name="Price" class="mt-1 p-2 w-full border border-gray-300 rounded" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="image" class="block text-sm font-medium text-gray-700">تصویر محصول</label>
+                <input type="file" id="image" name="Image" class="mt-1 p-2 w-full border border-gray-300 rounded" required>
+                <div id="image-preview" class="mt-4"></div>
+            </div>
+
+            <div class="mb-4">
+                <label for="stockQuantity" class="block text-sm font-medium text-gray-700">موجودی</label>
+                <input type="number" id="stockQuantity" name="StockQuantity" class="mt-1 p-2 w-full border border-gray-300 rounded" required>
+            </div>
+
+            <div>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">ویرایش جزئیات محصول</button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script>
+    const form = document.getElementById('edit-product-form');
+    const productIdInput = document.getElementById('productId');
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const priceInput = document.getElementById('price');
+    const stockQuantityInput = document.getElementById('stockQuantity');
+    const imagePreview = document.getElementById('image-preview');
+    const imageInput = document.getElementById('image');
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+        window.location.href = '/login/';
+    }
+
+    // بارگذاری اطلاعات اولیه محصول از API
+    async function fetchProductDetails() {
+        try {
+            const response = await fetch(`http://localhost:3000/ProductDetail/getById/${productId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const product = await response.json();
+
+            // پر کردن فیلدها با داده‌های محصول
+            productIdInput.value = product.ProductId;
+            titleInput.value = product.Title;
+            descriptionInput.value = product.Description;
+            priceInput.value = product.Price;
+            stockQuantityInput.value = product.StockQuantity;
+
+            if (product.Image) {
+                imagePreview.innerHTML = `<img src="${product.Image}" alt="تصویر محصول" class="w-32 h-32 rounded-lg">`;
+            }
+        } catch (error) {
+            console.error('خطا در بارگذاری اطلاعات محصول:', error);
+        }
+    }
+
+    // ارسال فرم برای ویرایش جزئیات محصول
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        // اضافه کردن اطلاعات تصویر (در صورت انتخاب یک تصویر جدید)
+        if (imageInput.files.length > 0) {
+            formData.append("Image", imageInput.files[0]);
+        }
+
+        const requestOptions = {
+            method: "PUT",
+            body: formData,
+            redirect: "follow",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        };
+
+        try {
+            const response = await fetch(`http://localhost:3000/ProductDetail/update/${productId}`, requestOptions);
+            const result = await response.text();
+            console.log(result);
+            alert('جزئیات محصول با موفقیت ویرایش شد');
+        } catch (error) {
+            console.error('خطا در ارسال درخواست:', error);
+            alert('خطا در ارسال درخواست');
+        }
+    });
+
+    // نمایش پیش‌نمایش عکس در صورت آپلود
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                imagePreview.innerHTML = `<img src="${event.target.result}" alt="تصویر محصول" class="w-32 h-32 rounded-lg">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // صدا زدن تابع برای بارگذاری اطلاعات اولیه محصول
+    fetchProductDetails();
+</script>
+
+</body>
+</html>

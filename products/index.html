@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محصولات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+    <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6">
+    <header class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-semibold">لیست محصولات</h1>
+        <a
+                href="/products/create/index.html"
+                class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+            افزودن محصول
+        </a>
+    </header>
+
+    <section class="bg-white rounded-lg shadow-lg">
+        <table class="w-full">
+            <thead class="bg-gray-200">
+            <tr>
+                <th class="p-3 text-right">عکس</th>
+                <th class="p-3 text-right">نام محصول</th>
+                <th class="p-3 text-right">توضیحات</th>
+                <th class="p-3 text-right">قیمت نهایی</th>
+                <th class="p-3 text-right">عملیات</th>
+            </tr>
+            </thead>
+            <tbody id="product-list">
+            <tr>
+                <td colspan="5" class="p-4 text-center text-gray-500">در حال بارگذاری...</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+        window.location.href = '/login/';
+    }
+
+    async function fetchProducts() {
+        try {
+            const response = await fetch('http://localhost:3000/Product/getList', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const products = await response.json();
+                renderProducts(products);
+            } else {
+                alert('خطا در دریافت لیست محصولات.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    }
+
+    function renderProducts(products) {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = '';
+
+        products.forEach(product => {
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                    <td class="p-3 text-center"><img src="${product.Image}" alt="${product.Title}" class="w-16 h-16 rounded"></td>
+                    <td class="p-3 text-right">${product.Title}</td>
+                    <td class="p-3 text-right">${product.Description}</td>
+                    <td class="p-3 text-right">${product.FinalPrice} تومان</td>
+                    <td class="p-3 text-right space-x-2">
+                        <button
+                            class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                            onclick="editProduct(${product.ProductId})">
+                            ویرایش
+                        </button>
+                        <button
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                            onclick="deleteProduct(${product.ProductId})">
+                            حذف
+                        </button>
+                    </td>
+                `;
+            productList.appendChild(row);
+        });
+    }
+
+    function editProduct(id) {
+        window.location.href = `/products/edit/index.html?id=${id}`;
+    }
+
+    async function deleteProduct(id) {
+        const confirmDelete = confirm('آیا مطمئن هستید که می‌خواهید این محصول را حذف کنید؟');
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`http://localhost:3000/Product/remove/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert('محصول با موفقیت حذف شد.');
+                fetchProducts();
+            } else {
+                alert('خطا در حذف محصول.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    }
+
+    fetchProducts();
+</script>
+</body>
+</html>

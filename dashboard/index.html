@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دشبورد</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+    <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<main class="flex-1 p-6 bg-white">
+    <div id="content" class="text-center text-gray-800">
+        <h1 class="text-3xl font-semibold">خوش آمدید</h1>
+        <p class="mt-4 text-gray-600">به داشبورد مدیریت خوش آمدید.</p>
+    </div>
+</main>
+
+<script>
+    const content = document.getElementById('content');
+
+    function navigate(page) {
+        switch (page) {
+            case 'welcome':
+                content.innerHTML = `
+                        <h1 class="text-3xl font-semibold">خوش آمدید</h1>
+                        <p class="mt-4 text-gray-600">به داشبورد مدیریت خوش آمدید.</p>
+                    `;
+                break;
+            case 'products':
+                content.innerHTML = `
+                        <h1 class="text-2xl font-semibold">محصولات</h1>
+                        <p class="mt-4 text-gray-600">در این بخش لیست محصولات نمایش داده می‌شود.</p>
+                    `;
+                break;
+            case 'categories':
+                content.innerHTML = `
+                        <h1 class="text-2xl font-semibold">دسته‌بندی‌ها</h1>
+                        <p class="mt-4 text-gray-600">در این بخش دسته‌بندی‌ها نمایش داده می‌شود.</p>
+                    `;
+                break;
+            case 'users':
+                content.innerHTML = `
+                        <h1 class="text-2xl font-semibold">کاربران</h1>
+                        <p class="mt-4 text-gray-600">در این بخش اطلاعات کاربران نمایش داده می‌شود.</p>
+                    `;
+                break;
+        }
+    }
+</script>
+
+</body>
+</html>

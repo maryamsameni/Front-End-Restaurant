@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه اصلی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden {
+            display: none;
+        }
+        .anime-show-in {
+            animation: slideIn 0.3s ease-in-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        *::-webkit-scrollbar{
+            width: 10px !important;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            background: gray;
+        }
+        *::-webkit-scrollbar-thumb{
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.27);
+            width: 10px !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-200">
+<main class="w-full h-screen drop-shadow-xl md:rounded-2xl overflow-x-hidden overflow-y-auto container mx-auto bg-gray-200">
+    <div class="flex flex-col-reverse md:flex-row w-full h-full">
+        <!-- Main Section -->
+        <section class="w-full md:w-2/3 bg-white rounded-2xl border-4 p-4 overflow-y-auto space-y-4">
+            <!-- Categories -->
+            <div id="categoriesSection" class="flex gap-4 p-2 border mx-2 rounded-2xl overflow-x-auto">
+                <!-- Dynamic Categories -->
+            </div>
+            <div class="w-full flex flex-wrap items-center justify-center" id="titleSectionCategory">
+            </div>
+            <!-- Products -->
+            <div id="productCards" class="flex flex-wrap justify-between">
+                <!-- Dynamic Product Cards -->
+            </div>
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="w-full duration-300 md:w-1/3 border-4 rounded-2xl content-start flex flex-wrap p-2 bg-white h-fit md:h-full space-y-3">
+            <!-- Header Section -->
+            <div class="hidden md:flex w-full rounded-xl flex-wrap p-2 items-center justify-between ps-3">
+                <div class="text-gray-600 font-bold text-3xl">
+                    m-Menu
+                </div>
+                <img src="public/icons/restaurant-icon.svg" alt="RestaurantLogo" class="w-20 h-20">
+            </div>
+
+            <!-- Login and Menu Section -->
+            <div class="w-full rounded-xl flex flex-wrap p-2 bg-gray-800 items-center justify-between">
+                <button class="btn bg-white rounded-xl p-1 flex items-center">
+                    <img src="public/icons/profile-icon.svg" alt="PersonIcon" class="w-8 h-8">
+                    <span>ورود / ثبت نام</span>
+                </button>
+                <button class="btn btn-square rounded-xl hover:border-gray-500 btn-outline">
+                    <img src="public/icons/menu-icon.svg" alt="menu-icon" class="w-10 h-10">
+                </button>
+            </div>
+
+            <!-- Status Section -->
+            <div class="w-full flex flex-wrap overflow-hidden items-center rounded-xl">
+                <div class="w-1/3 border-white flex items-center flex-wrap justify-center border-4 bg-amber-400 p-2 h-24 rounded-l-xl rounded-tr-[35px]">
+                    <div class="w-full flex items-center justify-center relative">
+                        <span class="loading bg-white absolute loading-ring loading-lg"></span>
+                        <img src="public/icons/light-icon.svg" alt="LightIcon" class="w-8 h-8">
+                    </div>
+                    <div class="text-[12px] text-white">
+                        سفارش می‌پذیریم.
+                    </div>
+                </div>
+                <div class="w-2/3 border-white border-4 bg-green-700 content-center space-y-2 p-2 ps-4 h-24 rounded-r-xl rounded-tl-[35px] text-sm font-medium text-white">
+                    <div class="w-full flex flex-wrap">
+                        سفارش ساندویچ ام
+                    </div>
+                    <div class="w-full flex items-center gap-2">
+                        <img src="public/icons/scooter-icon.svg" alt="ScooterIcon" class="w-6 h-6">
+                        <span>پیک: 30,000 تومان</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+    </div>
+</main>
+
+<!-- Modal -->
+<div id="productModal"
+     class="hidden text-black fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+    <div class="bg-white rounded-lg w-4/5 md:w-1/3 p-6">
+        <h2 class="text-xl text-black font-bold text-center" id="modalProductName"></h2>
+        <div class="w-full my-5  flex flex-col items-center justify-center">
+            <img id="modalProductImage" src="" alt="Product Image" class="w-20 h-20">
+        </div>
+        <p class="text-center text-black" id="modalProductDescription"></p>
+        <div class="text-center mt-2">
+            <span class="text-lg  font-medium" id="modalProductPrice"></span>
+        </div>
+        <button onclick="closeModal()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded-full">بستن</button>
+    </div>
+</div>
+
+<!-- Product Details Drawer -->
+<div dir="rtl" id="productDetailsDrawer" class="fixed z-40 inset-y-0 right-0 w-full md:w-1/3 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+    <div class="p-4">
+        <div class="w-full flex items-center justify-end">
+            <button id="closeDrawer" class="mb-4 bg-gray-100 py-2 px-4 rounded">X</button>
+        </div>
+        <h2 id="drawerProductName" class="text-2xl font-bold mb-4"></h2>
+        <img id="drawerProductImage" src="" alt="Product Image" class="w-full h-48 object-contain mb-4">
+        <p id="drawerProductDescription" class="mb-4"></p>
+        <p id="drawerProductPrice" class="text-xl font-bold mb-4"></p>
+
+        <div class="my-10 border rounded-xl p-3 relative">
+            <h3 class="absolute bg-white -top-4 right-4 font-bold mb-2">میخوای ترکیب کنم با اینا؟</h3>
+            <div id="extraItems">
+                <!-- Extra items will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="my-10  border rounded-xl p-3 relative">
+            <h3 class="absolute bg-white -top-4 right-4 font-bold mb-2">نوع نان</h3>
+            <div id="breadTypes">
+                <!-- Bread types will be dynamically added here -->
+            </div>
+        </div>
+
+        <button id="addToCartBtn" class="w-full bg-green-500 text-white py-2 px-4 rounded">افزودن به سبد خرید</button>
+    </div>
+</div>
+
+<!-- Cart Details Drawer -->
+<div dir="rtl" id="cartDetailsDrawer" class="fixed inset-y-0 right-0 w-full md:w-1/3 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto flex flex-col">
+    <div class="p-4 flex-grow">
+        <div class="w-full flex items-center justify-end">
+            <button id="closeDrawerCart" class="mb-4 bg-gray-100 py-2 px-4 rounded">X</button>
+        </div>
+        <!-- Cart Section -->
+        <div dir="rtl" id="cartSection" class="w-full">
+            <h2 class="text-xl font-bold mb-4">سبد خرید</h2>
+            <div id="cartItems" class="space-y-2">
+                <!-- Cart items will be dynamically added here -->
+            </div>
+            <div class="mt-4">
+                <p class="font-bold">تعداد کل: <span id="totalItems">0</span></p>
+                <p class="font-bold">قیمت کل: <span id="totalPrice">0</span> تومان</p>
+            </div>
+        </div>
+    </div>
+    <div class="w-full p-2 border-t">
+        <button id="confirmPurchaseBtn" class="w-full p-2 rounded-xl bg-blue-500 hover:bg-blue-700 hover:text-white">
+            تایید خرید
+        </button>
+    </div>
+</div>
+
+
+<div id="cart-item-section" class="card-items hidden w-[100px] h-[100px] fixed bottom-0 left-0 bg-white shadow rounded-tr-full">
+    <div class="w-full h-full flex items-center justify-center relative ">
+        <div class="w-12 h-12 rounded-xl text-xs text-white bg-green-600 absolute top-4 shadow right-4 flex flex-wrap  content-center   justify-center">
+            ثبت
+            <span id="cart-item-length">
+                1 مورد
+            </span>
+        </div>
+    </div>
+</div>
+
+
+<!-- Login Modal -->
+<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg w-96">
+        <div class="flex justify-end">
+            <button id="closeLoginModal" class="text-gray-500 hover:text-gray-700">X</button>
+        </div>
+        <h2 class="text-2xl font-bold mb-4">ورود به حساب</h2>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label for="emailOrPhone" class="block text-sm font-medium text-gray-700">ایمیل یا شماره تماس</label>
+                <input type="text" id="emailOrPhone" name="emailOrPhone" placeholder="ایمیل یا شماره تماس خود را وارد کنید" class="w-full p-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-700">کلمه عبور</label>
+                <input type="password" id="password" name="password" placeholder="کلمه عبور خود را وارد کنید" class="w-full p-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <label class="flex items-center text-sm text-gray-600">
+                    <input type="checkbox" class="mr-2">
+                    مرا به خاطر بسپار
+                </label>
+                <a href="#" class="text-sm text-blue-500 hover:underline">فراموشی کلمه عبور؟</a>
+            </div>
+            <button type="submit" class="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">ورود</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // State
+    let categories = [];
+    let products = [];
+    let categorySelected = 2;
+    let selectedProduct = null;
+    let cart = {};
+
+    // Fetch Data
+    async function fetchData() {
+        try {
+            const [categoriesResponse, productsResponse] = await Promise.all([
+                fetch("http://localhost:3000/Category/getList"),
+                fetch("http://localhost:3000/Product/getList")
+            ]);
+            categories = await categoriesResponse.json();
+            products = await productsResponse.json();
+            renderCategories();
+            renderSelectedCategory();
+            renderProducts();
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    // Render Categories
+    function renderCategories() {
+        const categoriesSection = document.getElementById("categoriesSection");
+        categoriesSection.innerHTML = categories
+            .map(
+                (category) => `
+                    <div onclick="selectCategory(${category.CategoryId})" class="${category.CategoryId === categorySelected ? "bg-green-700" : "bg-gray-100"} cursor-pointer w-24 h-32 flex flex-col justify-center items-center space-y-2 p-2 rounded-full">
+                        <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center">
+                            <img src="${category?.Image}" alt="Burger" class="w-12 h-12">
+                        </div>
+                        <button class="${category.CategoryId === categorySelected ? "text-white" : "bg-gray-100 text-gray-700"}">
+                            <strong class="text-center text-xs line-clamp-2">${category.Title}</strong>
+                        </button>
+                    </div>
+                `
+            )
+            .join("");
+    }
+
+    // Render Selected Category
+    function renderSelectedCategory() {
+        const selectedCategory = categories.find((cat) => cat.CategoryId === categorySelected);
+        document.getElementById("titleSectionCategory").innerHTML = `
+                <div class="w-full flex items-center gap-2 justify-evenly">
+                    <span class="border-[0.6px] flex w-1/4"></span>
+                    <span>${selectedCategory?.Title || ""}</span>
+                    <span class="border-[0.6px] flex w-1/4"></span>
+                </div>
+            `;
+    }
+
+    // Render Products
+    function renderProducts() {
+        const productCards = document.getElementById("productCards");
+        const filteredProducts = products.filter((product) => product.CategoryId === categorySelected);
+        productCards.innerHTML = filteredProducts
+            .map(
+                (product) => `
+                    <div class="product-card w-full md:w-1/2 p-2 cursor-pointer">
+                        <div class="border rounded-2xl flex flex-col md:flex-row h-60 p-4">
+                            <div class="w-full md:w-2/5 flex flex-col items-center justify-between">
+                                <img src="${product.Image || "/public/vector/burger-vector.svg"}" alt="${product.Title}" class="w-20 h-20">
+                                <div class="w-full flex item-center justify-center px-3">
+                                    <button onclick="openProductDetails(${product.ProductId})" class="btn bg-green-700 text-sm p-2 w-full text-white rounded-xl">انتخاب</button>
+                                </div>
+                            </div>
+                            <div onclick="showProductDetails(
+              '${product?.Title}',
+              '${product?.Description}',
+              '${product?.Price}',
+              '${product?.Image}',
+          )" dir="rtl"  class="w-full md:w-3/5 flex text-black flex-col justify-between p-3">
+                                <h2 class="font-bold text-lg">${product.Title}</h2>
+                                <p class="text-black text-sm line-clamp-3">${product.Description}</p>
+                                <div class="font-medium">${product.Price} تومان</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+    }
+
+    // Select Category
+    function selectCategory(categoryId) {
+        categorySelected = categoryId;
+        renderCategories();
+        renderSelectedCategory();
+        renderProducts();
+    }
+
+    function showProductDetails(name, description, price, image) {
+        document.getElementById('modalProductName').innerText = name;
+        document.getElementById('modalProductDescription').innerText = description;
+        document.getElementById('modalProductPrice').innerText = price;
+        document.getElementById('modalProductImage').src = image || "/public/vector/burger-vector.svg";
+        document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('productModal').classList.add('hidden');
+    }
+
+    // Open Product Details
+    function openProductDetails(productId) {
+        selectedProduct = products.find(p => p.ProductId === productId);
+        if (selectedProduct) {
+            document.getElementById("drawerProductName").textContent = selectedProduct.Title;
+            document.getElementById("drawerProductImage").src = selectedProduct.Image || "/public/vector/burger-vector.svg";
+            document.getElementById("drawerProductDescription").textContent = selectedProduct.Description;
+            document.getElementById("drawerProductPrice").textContent = `${selectedProduct.Price} تومان`;
+
+            // Render extra items
+            document.getElementById("extraItems").innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" id="extra-جگر" data-name="جگر" data-price="500" class="mr-2">
+                        <label for="extra-جگر" class="flex-grow">جگر</label>
+                        <span class="text-sm">500 تومان</span>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" id="extra-قلوه" data-name="قلوه" data-price="700" class="mr-2">
+                        <label for="extra-قلوه" class="flex-grow">قلوه</label>
+                        <span class="text-sm">700 تومان</span>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" id="extra-دل" data-name="دل" data-price="600" class="mr-2">
+                        <label for="extra-دل" class="flex-grow">دل</label>
+                        <span class="text-sm">600 تومان</span>
+                    </div>
+                `;
+
+            // Render bread types
+            document.getElementById("breadTypes").innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="radio" id="bread-لواش" name="breadType" value="لواش" class="mr-2">
+                        <label for="bread-لواش">لواش</label>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="radio" id="bread-فانتزی" name="breadType" value="فانتزی" class="mr-2">
+                        <label for="bread-فانتزی">فانتزی</label>
+                    </div>
+                `;
+
+            document.getElementById("productDetailsDrawer").classList.remove("translate-x-full");
+        }
+    }
+
+    // Close Product Details
+    document.getElementById("closeDrawer").addEventListener("click", () => {
+        document.getElementById("productDetailsDrawer").classList.add("translate-x-full");
+    });
+
+    // Add to Cart
+    document.getElementById("addToCartBtn").addEventListener("click", () => {
+        if (selectedProduct) {
+            const extraItems = Array.from(document.querySelectorAll('#extraItems input[type="checkbox"]:checked'))
+                .map(checkbox => ({
+                    name: checkbox.dataset.name,
+                    price: parseInt(checkbox.dataset.price)
+                }));
+            const breadType = document.querySelector('input[name="breadType"]:checked')?.value || '';
+
+            const cartItem = {
+                ...selectedProduct,
+                extraItems,
+                breadType,
+                quantity: 1
+            };
+
+            if (!cart[selectedProduct.ProductId]) {
+                cart[selectedProduct.ProductId] = cartItem;
+            } else {
+                // If the item already exists, show edit options
+                cart[selectedProduct.ProductId].quantity += 1;
+                    showEditOptions(selectedProduct.ProductId, cartItem);
+            }
+
+            updateCartDisplay();
+            document.getElementById("productDetailsDrawer").classList.add("translate-x-full");
+        }
+    });
+
+    // Function to show edit options for existing cart items
+    function showEditOptions(productId, newItem) {
+        const existingItem = cart[productId];
+        const editOptions = confirm(
+            `این محصول در سبد خرید شما وجود دارد. می‌خواهید آن را ویرایش کنید؟\n\n` +
+            `محصول فعلی:\n` +
+            `تعداد: ${existingItem.quantity}\n` +
+            `نان: ${existingItem.breadType}\n` +
+            `اضافه‌ها: ${existingItem.extraItems.map(item => item.name).join(', ')}\n\n` +
+            `محصول جدید:\n` +
+            `نان: ${newItem.breadType}\n` +
+            `اضافه‌ها: ${newItem.extraItems.map(item => item.name).join(', ')}`
+        );
+
+        if (editOptions) {
+            // Replace the existing item with the new one
+            cart[productId] = newItem;
+            cart[productId].quantity++;
+        } else {
+            // Just increment the quantity of the existing item
+            cart[productId].quantity++;
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    // Update Cart Display
+    function updateCartDisplay() {
+        const cartItemsContainer = document.getElementById("cartItems");
+        cartItemsContainer.innerHTML = '';
+        let totalItems = 0;
+        let totalPrice = 0;
+
+        for (const [productId, item] of Object.entries(cart)) {
+            const itemTotalPrice = parseInt(item.Price) * item.quantity +
+                item.extraItems.reduce((sum, extra) => sum + extra.price, 0) * item.quantity;
+            totalItems += item.quantity;
+            totalPrice += itemTotalPrice;
+
+            cartItemsContainer.innerHTML += `
+                <div class="border-b pb-2 mb-2">
+                    <h3 class="font-bold">${item.Title}</h3>
+                    <p>تعداد: ${item.quantity}</p>
+                    <p>قیمت: ${itemTotalPrice} تومان</p>
+                    ${item.extraItems.length ? `<p>اضافه‌ها: ${item.extraItems.map(extra => extra.name).join(', ')}</p>` : ''}
+                    ${item.breadType ? `<p>نان: ${item.breadType}</p>` : ''}
+                    <div class="mt-2">
+                        <button onclick="editCartItem(${productId})" class="bg-blue-500 text-white px-2 py-1 rounded mr-2">ویرایش</button>
+                        <button onclick="deleteCartItem(${productId})" class="bg-red-500 text-white px-2 py-1 rounded">حذف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById("totalItems").textContent = totalItems;
+        document.getElementById("totalPrice").textContent = totalPrice;
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+    }
+
+    // Function to edit a cart item
+    function editCartItem(productId) {
+        const item = cart[productId];
+        if (item) {
+            selectedProduct = item;
+            openProductDetails(productId);
+            // Pre-select the current options
+            document.querySelector(`input[name="breadType"][value="${item.breadType}"]`).checked = true;
+            item.extraItems.forEach(extra => {
+                document.querySelector(`input[type="checkbox"][data-name="${extra.name}"]`).checked = true;
+            });
+        }
+    }
+
+    // Function to delete a cart item
+    function deleteCartItem(productId) {
+        if (confirm('آیا مطمئن هستید که می‌خواهید این محصول را از سبد خرید حذف کنید؟')) {
+            delete cart[productId];
+            updateCartDisplay();
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+    }
+
+    // // Load initial cart state
+    // window.addEventListener("load", () => {
+    //
+    // });
+
+    document.getElementById("cart-item-length").parentElement.addEventListener("click", () => openCartDetails())
+
+
+
+
+    // Open Cart Details
+    function openCartDetails() {
+            document.getElementById("cartDetailsDrawer").classList.remove("translate-x-full");
+    }
+
+    // Close Product Details
+    document.getElementById("closeDrawerCart").addEventListener("click", () => {
+        document.getElementById("cartDetailsDrawer").classList.add("translate-x-full");
+    });
+
+
+    // Event listener for the confirm purchase button
+    document.getElementById("confirmPurchaseBtn").addEventListener("click", () => {
+        // Check if the user has a token in localStorage or sessionStorage
+        const userToken = localStorage.getItem("userToken");
+
+        // If no token, show login modal
+        if (!userToken) {
+            openLoginModal();
+        } else {
+            // If token exists, validate it via API
+            validateToken(userToken);
+        }
+    });
+
+    function validateToken(token) {
+        fetch("https://your-api-endpoint.com/validate-token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify({ token: token })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    // If the token is valid, redirect to user panel
+                    window.location.href = "/user-panel";
+                } else {
+                    // If the token is not valid, show login modal again
+                    openLoginModal();
+                }
+            })
+            .catch(error => {
+                console.error("Error validating token:", error);
+                openLoginModal(); // In case of any error, show login modal
+            });
+    }
+    // Show the login modal
+    function openLoginModal() {
+        document.getElementById("loginModal").classList.remove("hidden");
+    }
+
+    // Close the login modal
+    document.getElementById("closeLoginModal").addEventListener("click", () => {
+        document.getElementById("loginModal").classList.add("hidden");
+    });
+
+    // Handle the form submission (You can send the data to your API here)
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const emailOrPhone = document.getElementById("emailOrPhone").value;
+        const password = document.getElementById("password").value;
+
+        // Send data to your API for login (replace with your API call)
+        fetch("https://your-api-endpoint.com/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                emailOrPhone: emailOrPhone,
+                password: password,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Handle successful login, e.g., store the token and close the modal
+                    localStorage.setItem("userToken", data.token);
+                    openCartDetails();  // You can replace this with your own logic
+                    document.getElementById("loginModal").classList.add("hidden");
+                } else {
+                    // Show error message if login fails
+                    alert("ورود ناموفق بود. لطفاً اطلاعات خود را بررسی کنید.");
+                }
+            })
+            .catch(error => {
+                console.error("Error during login:", error);
+                alert("خطا در ورود. لطفاً دوباره تلاش کنید.");
+            });
+    });
+
+
+
+
+
+
+
+
+    function cartItemHandler() {
+        const savedCart = JSON.parse(localStorage.getItem("cart"));
+        if (savedCart) {
+            cart = savedCart;
+            updateCartDisplay();
+        }
+        if (Object.entries(savedCart)?.length > 0 ) {
+            document.getElementById("cart-item-section").classList.remove("hidden");
+            document.getElementById("cart-item-length").innerText = ` ${Object.entries(savedCart).length}  مورد `;
+        }
+    }
+
+
+
+    cartItemHandler()
+    // Initialize
+    fetchData();
+</script>
+</body>
+</html>
+

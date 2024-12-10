@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایش محصول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+    <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6">
+    <header class="mb-6">
+        <h1 class="text-2xl font-semibold">ویرایش محصول</h1>
+    </header>
+
+    <section class="bg-white p-6 rounded-lg shadow-lg">
+        <form id="update-product-form" class="space-y-4">
+            <input
+                    type="text"
+                    id="title"
+                    placeholder="نام محصول"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <textarea
+                    id="description"
+                    placeholder="توضیحات محصول"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+            <input
+                    type="number"
+                    id="price"
+                    placeholder="قیمت محصول"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+                    type="number"
+                    id="discount"
+                    placeholder="تخفیف"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+                    type="number"
+                    id="final-price"
+                    placeholder="قیمت نهایی"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+                    id="category-id"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <option value="" disabled selected>دسته‌بندی محصول</option>
+            </select>
+            <input
+                    type="file"
+                    id="image"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+                    id="status"
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <option value="active">فعال</option>
+                <option value="inactive">غیرفعال</option>
+            </select>
+            <button
+                    type="submit"
+                    class="w-full px-4 py-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+            >
+                ویرایش محصول
+            </button>
+        </form>
+    </section>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+        window.location.href = '/login/';
+    }
+
+    // Get the product ID from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    // Fetch the product details and categories from the backend
+    async function fetchProductAndCategories() {
+        try {
+            // Fetch product details
+            const productResponse = await fetch(`http://localhost:3000/Product/getById/${productId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!productResponse.ok) {
+                alert('محصول یافت نشد.');
+                return;
+            }
+
+            const product = await productResponse.json();
+
+            // Fill the form with product data
+            document.getElementById('title').value = product.Title;
+            document.getElementById('description').value = product.Description;
+            document.getElementById('price').value = product.Price;
+            document.getElementById('discount').value = product.Discount;
+            document.getElementById('final-price').value = product.FinalPrice;
+            document.getElementById('status').value = product.Status;
+
+            // Fetch categories
+            const categoriesResponse = await fetch('http://localhost:3000/Category/getList', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!categoriesResponse.ok) {
+                alert('خطا در بارگذاری دسته‌بندی‌ها.');
+                return;
+            }
+
+            const categories = await categoriesResponse.json();
+            const categorySelect = document.getElementById('category-id');
+
+            categories.forEach((category) => {
+                const option = document.createElement('option');
+                option.value = category.CategoryId;
+                option.textContent = category.Title;
+                categorySelect.appendChild(option);
+            });
+
+            // Set the selected category
+            categorySelect.value = product.CategoryId;
+
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    }
+
+    fetchProductAndCategories();
+
+    const form = document.getElementById('update-product-form');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const price = document.getElementById('price').value.trim();
+        const discount = document.getElementById('discount').value.trim();
+        const finalPrice = document.getElementById('final-price').value.trim();
+        const categoryId = document.getElementById('category-id').value;
+        const status = document.getElementById('status').value;
+        const imageInput = document.getElementById('image');
+
+        if (!title || !description || !price || !finalPrice || !categoryId || !status) {
+            alert('لطفاً تمام فیلدها را تکمیل کنید.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('Title', title);
+        formData.append('Description', description);
+        formData.append('Price', price);
+        formData.append('Discount', discount || '0');
+        formData.append('FinalPrice', finalPrice);
+        formData.append('CategoryId', categoryId);
+        formData.append('Status', status);
+
+        if (imageInput.files[0]) {
+            formData.append('Image', imageInput.files[0]);
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3000/Product/update/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('محصول با موفقیت ویرایش شد.');
+                window.location.href = '/products';
+            } else {
+                alert('خطا در ویرایش محصول.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    });
+</script>
+</body>
+</html>

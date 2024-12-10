@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایش دسته‌بندی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col p-4 space-y-4">
+    <div class="text-center font-semibold text-xl mb-6">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6 bg-gray-50">
+    <div class="w-full  mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-center text-xl font-semibold mb-6">ویرایش دسته‌بندی</h2>
+        <form id="edit-category-form">
+            <div class="mb-4">
+                <label for="title" class="block text-right">عنوان دسته‌بندی</label>
+                <input type="text" id="title" class="w-full p-2 border rounded mt-2" />
+            </div>
+            <div class="mb-4">
+                <label for="image" class="block text-right">تصویر</label>
+                <input type="file" id="image" class="w-full p-2 border rounded mt-2" />
+            </div>
+            <div class="mb-4">
+                <label for="status" class="block text-right">وضعیت</label>
+                <select id="status" class="w-full p-2 border rounded mt-2">
+                    <option value="active">فعال</option>
+                    <option value="inactive">غیرفعال</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="sortOrder" class="block text-right">ترتیب</label>
+                <input type="number" id="sortOrder" class="w-full p-2 border rounded mt-2" />
+            </div>
+            <div class="flex justify-center mt-4">
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">ذخیره تغییرات</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryId = urlParams.get('id');
+
+    if (!token) {
+        alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+        window.location.href = '/login/';
+    }
+
+    async function fetchCategory() {
+        try {
+            const response = await fetch(`http://localhost:3000/Category/getById/${categoryId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const category = await response.json();
+                document.getElementById('title').value = category.Title;
+                document.getElementById('status').value = category.Status;
+                document.getElementById('sortOrder').value = category.SortOrder;
+            } else {
+                alert('خطا در بارگذاری اطلاعات دسته‌بندی.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    }
+
+    async function updateCategory(event) {
+        event.preventDefault();
+
+        const title = document.getElementById('title').value;
+        const image = document.getElementById('image').files[0];
+        const status = document.getElementById('status').value;
+        const sortOrder = document.getElementById('sortOrder').value;
+
+        const formData = new FormData();
+        formData.append('Title', title);
+        formData.append('Image', image);
+        formData.append('Status', status);
+        formData.append('SortOrder', sortOrder);
+
+        try {
+            const requestOptions = {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            };
+
+            const response = await fetch(`http://localhost:3000/Category/update/${categoryId}`, requestOptions);
+
+            if (response.ok) {
+                alert('دسته‌بندی با موفقیت ویرایش شد.');
+                window.location.href = '/categories';
+            } else {
+                alert('خطا در ویرایش دسته‌بندی.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    }
+
+    document.getElementById('edit-category-form').addEventListener('submit', updateCategory);
+
+    fetchCategory(); // Fetch the category data on page load
+</script>
+
+</body>
+</html>

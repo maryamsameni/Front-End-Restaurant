@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ایجاد ویژگی محصول</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col">
+  <div class="p-4 text-center font-semibold text-xl">مدیریت سایت</div>
+  <nav class="flex-1">
+     <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6">
+  <header class="flex justify-between items-center mb-4">
+    <h1 class="text-xl font-semibold">ایجاد ویژگی محصول</h1>
+    <a href="/product-details/index.html" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+      برگشت به ویژگی‌ها
+    </a>
+  </header>
+
+  <section class="bg-white rounded-lg shadow-lg p-4">
+    <form id="create-product-attribute-form" class="space-y-4">
+      <div>
+        <label for="product-detail-select" class="block text-lg">انتخاب محصول</label>
+        <select id="product-detail-select" class="w-full px-4 py-2 border rounded-lg">
+          <option value="">انتخاب محصول</option>
+          <!-- لیست محصولات به صورت داینامیک بارگذاری می‌شود -->
+        </select>
+      </div>
+
+      <div>
+        <label for="name" class="block text-lg">نام ویژگی</label>
+        <input type="text" id="name" name="name" class="w-full px-4 py-2 border rounded-lg" required>
+      </div>
+
+      <div>
+        <label for="options" class="block text-lg">گزینه</label>
+        <input type="text" id="options" name="options" class="w-full px-4 py-2 border rounded-lg" required>
+      </div>
+
+      <div>
+        <label for="price" class="block text-lg">قیمت</label>
+        <input type="text" id="price" name="price" class="w-full px-4 py-2 border rounded-lg" required>
+      </div>
+
+      <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">ایجاد ویژگی</button>
+    </form>
+  </section>
+</main>
+
+<script>
+  const token = localStorage.getItem('token');
+  // فراخوانی لیست محصولات
+  async function fetchProductDetails() {
+    try {
+      const response = await fetch('http://localhost:3000/ProductDetail/getList', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const products = await response.json();
+        populateProductSelect(products);
+      } else {
+        alert('خطا در دریافت محصولات.');
+      }
+    } catch (error) {
+      console.error('خطا در ارتباط با سرور:', error);
+      alert('خطا در ارتباط با سرور.');
+    }
+  }
+
+  // پر کردن سلکت با لیست محصولات
+  function populateProductSelect(products) {
+    const select = document.getElementById('product-detail-select');
+    products.forEach(product => {
+      const option = document.createElement('option');
+      option.value = product.ProductDetailId;
+      option.textContent = `${product.Title} - ${product.Price} تومان`;
+      select.appendChild(option);
+    });
+  }
+
+  // ارسال اطلاعات فرم
+  document.getElementById('create-product-attribute-form').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const productDetailId = document.getElementById('product-detail-select').value;
+    const name = document.getElementById('name').value;
+    const options = document.getElementById('options').value;
+    const price = document.getElementById('price').value;
+
+    if (!productDetailId || !name || !options || !price) {
+      alert('تمامی فیلدها باید پر شوند.');
+      return;
+    }
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Authorization", `Bearer ${token}`);
+
+    const raw = JSON.stringify({
+      "ProductAttributes": [
+        {
+          "ProductDetailId": productDetailId,
+          "Name": name,
+          "Options": options,
+          "Price": price
+        }
+      ]
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/ProductAttribute/create", requestOptions);
+      const result = await response.text();
+      if (response.ok) {
+        alert('ویژگی محصول با موفقیت ایجاد شد.');
+        window.location.href = '/product-attribute/index.html'; // هدایت به صفحه ویژگی‌ها
+      } else {
+        alert('خطا در ارسال داده‌ها.');
+      }
+    } catch (error) {
+      console.error('خطا در ارسال اطلاعات:', error);
+      alert('خطا در ارسال اطلاعات.');
+    }
+  });
+
+  // بارگذاری محصولات هنگام بارگذاری صفحه
+  fetchProductDetails();
+</script>
+
+</body>
+</html>

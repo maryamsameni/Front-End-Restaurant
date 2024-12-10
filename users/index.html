@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لیست کاربران</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-blue-500 text-white flex flex-col p-4 space-y-4">
+    <div class="text-center font-semibold text-xl mb-6">مدیریت سایت</div>
+    <nav class="flex-1">
+         <ul class="space-y-2 p-4">
+      <li><a href="/dashboard/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">صفحه اصلی</a></li>
+      <li><a href="/products/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">محصولات</a></li>
+      <li><a href="/product-details/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">جزئیات محصولات</a></li>
+      <li><a href="/product-attribute/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">ویژگی محصولات</a></li>
+      <li><a href="/categories/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">دسته‌بندی‌ها</a></li>
+      <li><a href="/users/index.html" class="block px-4 py-2 rounded hover:bg-blue-600">کاربران</a></li>
+    </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6 bg-gray-50">
+    <div class="w-full max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-center text-xl font-semibold mb-6">لیست کاربران</h2>
+        <table class="min-w-full table-auto border-collapse border border-gray-300">
+            <thead>
+            <tr class="bg-gray-200">
+                <th class="px-4 py-2 border">نام</th>
+                <th class="px-4 py-2 border">نام خانوادگی</th>
+                <th class="px-4 py-2 border">موبایل</th>
+                <th class="px-4 py-2 border">ایمیل</th>
+                <th class="px-4 py-2 border">تاریخ ایجاد</th>
+            </tr>
+            </thead>
+            <tbody id="user-list">
+            <!-- Users will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('توکن یافت نشد. لطفاً دوباره وارد شوید.');
+        window.location.href = '/login/';
+    }
+
+    async function fetchUsers() {
+        try {
+            const response = await fetch('http://localhost:3000/User/get', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const users = await response.json();
+                const userList = document.getElementById('user-list');
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.classList.add('border-t');
+                    row.innerHTML = `
+                        <td class="px-4 py-2 border">${user.FirstName}</td>
+                        <td class="px-4 py-2 border">${user.LastName}</td>
+                        <td class="px-4 py-2 border">${user.Mobile}</td>
+                        <td class="px-4 py-2 border">${user.Email}</td>
+                        <td class="px-4 py-2 border">${new Date(user.createdAt).toLocaleString()}</td>
+                    `;
+                    userList.appendChild(row);
+                });
+            } else {
+                alert('خطا در بارگذاری کاربران.');
+            }
+        } catch (error) {
+            alert('خطا در ارتباط با سرور.');
+        }
+    }
+
+    fetchUsers(); // Fetch users on page load
+</script>
+
+</body>
+</html>
